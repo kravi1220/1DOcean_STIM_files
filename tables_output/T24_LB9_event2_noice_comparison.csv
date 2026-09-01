@@ -1,0 +1,10 @@
+run,closure,ice,max_diff_vs_noice,identical_to_noice
+e2_keps_winton,k-eps,winton,0.0,True
+e2_keps_lebedev,k-eps,lebedev,0.0,True
+e2_keps_mylake,k-eps,mylake,0.0,True
+e2_komega_winton,k-omega,winton,0.0,True
+e2_komega_lebedev,k-omega,lebedev,0.0,True
+e2_komega_mylake,k-omega,mylake,0.0,True
+e2_kpp_winton,kpp,winton,0.0,True
+e2_kpp_lebedev,kpp,lebedev,0.0,True
+e2_kpp_mylake,kpp,mylake,0.0,True

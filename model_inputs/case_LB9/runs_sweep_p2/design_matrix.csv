@@ -1,0 +1,13 @@
+run,closure,ice,offset
+sw_p2_keps_winton,k-eps,winton,2
+sw_p2_keps_lebedev,k-eps,lebedev,2
+sw_p2_keps_mylake,k-eps,mylake,2
+sw_p2_komega_winton,k-omega,winton,2
+sw_p2_komega_lebedev,k-omega,lebedev,2
+sw_p2_komega_mylake,k-omega,mylake,2
+sw_p2_kpp_winton,kpp,winton,2
+sw_p2_kpp_lebedev,kpp,lebedev,2
+sw_p2_kpp_mylake,kpp,mylake,2
+sw_p2_noice_keps,k-eps,no_ice,2
+sw_p2_noice_komega,k-omega,no_ice,2
+sw_p2_noice_kpp,kpp,no_ice,2
