@@ -1,4 +1,4 @@
-# Reproduction package: "Beyond the No-Physics Control: A Verification Framework for 1D Ocean-Ice Modeling"
+#  "Beyond the No-Physics Control: A Verification Framework for 1D Ocean-Ice Modeling"
 
 Kumar Ravi Prakash. Reproduction package for a manuscript submitted to the
 *Journal of Advances in Modeling Earth Systems* (JAMES).
@@ -22,25 +22,6 @@ GOTM-config files in the first place, nor any raw model output — see
 | `data/` | CTD profile data for all 87 network stations (`ctd_profiles_<STATION>.nc`) and cached OSI-SAF sea-ice concentration extracts used by the figures. |
 | `tables_output/`, `figures_output/` | Pre-computed reference outputs, regenerated fresh from this exact package and verified byte-identical to the paper's own working tables (image files may differ by a few pixels from run to run due to font/anti-aliasing rendering, not data). |
 
-## What's deliberately not here
-
-Per this package's scope, the following are excluded even though the paper
-depends on them:
-
-- **Code that built the `.yaml`/`.dat` files in `model_inputs/`** — the
-  initial-condition builders, meteo/forcing builders, and GOTM-config
-  generators. The *files themselves* are included and are exactly what
-  every GOTM run in the paper used; only the generating code is not.
-- **Code that downloaded raw data** (ERA5 via the Copernicus CDS API,
-  OSI-SAF via OPeNDAP). The already-fetched extracts this package's
-  figures/tables actually need are included in `data/`.
-- **Raw GOTM NetCDF model output** (hundreds of GB across every
-  experiment set). Running `run_gotm/run_gotm_case.sh` over
-  `model_inputs/` regenerates it.
-
-If you need any of the above (e.g. to build a new case from scratch, or to
-re-fetch ERA5/OSI-SAF yourself), see the full pipeline archive referenced in
-the manuscript's Open Research statement.
 
 ## Software requirements
 
