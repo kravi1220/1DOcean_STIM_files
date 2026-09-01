@@ -1,0 +1,9 @@
+__pycache__/
+*.pyc
+*.o
+*.mod
+gotm_source/build/
+gotm_source/build_debug/
+model_inputs/**/all.nc
+model_inputs/**/*.log
+station_screening_results.csv

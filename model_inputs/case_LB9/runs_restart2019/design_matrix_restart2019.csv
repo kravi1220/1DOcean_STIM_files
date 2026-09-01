@@ -1,0 +1,13 @@
+run,closure,ice
+r19_keps_winton,k-eps,winton
+r19_keps_lebedev,k-eps,lebedev
+r19_keps_mylake,k-eps,mylake
+r19_komega_winton,k-omega,winton
+r19_komega_lebedev,k-omega,lebedev
+r19_komega_mylake,k-omega,mylake
+r19_kpp_winton,kpp,winton
+r19_kpp_lebedev,kpp,lebedev
+r19_kpp_mylake,kpp,mylake
+r19_noice_keps,k-eps,no_ice
+r19_noice_komega,k-omega,no_ice
+r19_noice_kpp,kpp,no_ice

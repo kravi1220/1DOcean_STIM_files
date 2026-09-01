@@ -1,0 +1,4 @@
+comparison,mean_diff,diff_by_date,t_stat,t_pvalue,wilcoxon_pvalue,sign_consistent
+best_valid_vs_persistence,-0.10834260684145891,+0.0210|-0.6097|+0.2397|-0.0844,-0.6010946712203697,0.590159958188405,0.875,False
+closure_only_keps_vs_kpp,0.018976381509006213,-0.0015|+0.0018|+0.0280|+0.0477,1.6332188696268342,0.20092972901133552,0.25,False
+ice_scheme_only_mylake_vs_lebedev_within_komega,0.0,+0.0000|+0.0000|+0.0000|+0.0000,nan,nan,1.0,False

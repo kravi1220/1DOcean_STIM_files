@@ -1,0 +1,5 @@
+configuration,rmse_T,rmse_S,delta_vs_persistence,note
+k-eps (all 3 ice schemes; bit-identical; Hice=0 throughout),3.3553834103902287,0.3439881845503189,-0.08089561115113186,vs. persistence: significant
+k-omega (all 3 ice schemes; bit-identical; Hice=0 throughout),3.3279364146999013,0.36881027611894995,-0.10834260684145924,vs. persistence: significant
+kpp (all 3 ice schemes; bit-identical; Hice=0 throughout),3.336407028881222,0.34437332608922905,-0.09987199266013835,vs. persistence: significant
+Persistence (null baseline),3.4362790215413606,0.36190007391077805,0.0,reference

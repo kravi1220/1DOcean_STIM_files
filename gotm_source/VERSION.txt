@@ -1,0 +1,24 @@
+GOTM source code bundled with this package, as used for every simulation
+in the paper. Git history (.git/) and build directories were stripped to
+keep the archive small; the exact commit of each component is recorded
+below so the build is still fully identifiable.
+
+gotm            v6.0.0-211-g84f8d8e9  (84f8d8e9567d16f203ae41a55ff56b1cf6e0fe09)
+extern/stim     c54fc329ab364817c5a2c4cc43bb797d866faacd
+extern/CVMix-src 52aac958e05cdb2471dc73f9ef7fb4e816c550f2
+extern/gsw      6a8af9f95927ecc8a9f63c39ccaba3fb1c6f6db0
+extern/flexout  df93ba53a35e0cf73496a77e99cb8cfec10f2f56
+extern/fabm     980a0eaaa16807997c1bf6716c6fa6c82fc1a43d  (checked out but unused: FABM was built OFF)
+
+Upstream source: https://github.com/gotm-model/code
+STIM source:     https://github.com/BoldingBruggeman/stim
+
+Build configuration used for this study:
+    cmake -B build -DCMAKE_BUILD_TYPE=Release \
+          -DGOTM_USE_STIM=ON -DGOTM_USE_CVMIX=ON -DGOTM_USE_FABM=OFF \
+          -DSTIM_WINTON=ON -DSTIM_LEBEDEV=ON -DSTIM_MYLAKE=ON -DSTIM_BASAL_MELT=ON
+    cmake --build build
+
+The resulting `gotm` binary (at build/gotm) is what every gotm.yaml in
+model_inputs/ was run with -- pass its path as the second argument to
+run_gotm/run_gotm_case.sh.

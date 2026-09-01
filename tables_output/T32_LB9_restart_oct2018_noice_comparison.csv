@@ -1,0 +1,10 @@
+run,closure,ice,max_diff_vs_noice,identical_to_noice
+roct18_keps_winton,keps,winton,0.0,True
+roct18_keps_lebedev,keps,lebedev,0.0,True
+roct18_keps_mylake,keps,mylake,0.0,True
+roct18_komega_winton,komega,winton,0.0,True
+roct18_komega_lebedev,komega,lebedev,0.0,True
+roct18_komega_mylake,komega,mylake,0.0,True
+roct18_kpp_winton,kpp,winton,0.0,True
+roct18_kpp_lebedev,kpp,lebedev,0.0,True
+roct18_kpp_mylake,kpp,mylake,0.0,True

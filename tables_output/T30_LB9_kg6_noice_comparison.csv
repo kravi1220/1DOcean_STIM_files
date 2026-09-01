@@ -1,0 +1,10 @@
+run,closure,ice,max_diff_vs_noice,identical_to_noice
+kg6_keps_winton,k-eps,winton,13.300749778747559,False
+kg6_keps_lebedev,k-eps,lebedev,0.0,True
+kg6_keps_mylake,k-eps,mylake,2.1890978813171387,False
+kg6_komega_winton,k-omega,winton,9.639423370361328,False
+kg6_komega_lebedev,k-omega,lebedev,0.0,True
+kg6_komega_mylake,k-omega,mylake,11.836967468261719,False
+kg6_kpp_winton,kpp,winton,13.925467491149902,False
+kg6_kpp_lebedev,kpp,lebedev,0.0,True
+kg6_kpp_mylake,kpp,mylake,2.611185312271118,False

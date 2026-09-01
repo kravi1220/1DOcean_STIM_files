@@ -1,0 +1,13 @@
+run,closure,ice,rmse_T,max_hice
+kg6_keps_winton,k-eps,winton,1.1843517941097546,1.1551415920257568
+kg6_keps_lebedev,k-eps,lebedev,0.982344759340585,0.0
+kg6_keps_mylake,k-eps,mylake,0.9624018141011222,0.20095916092395782
+kg6_komega_winton,k-omega,winton,0.9259272868473574,1.2706178426742554
+kg6_komega_lebedev,k-omega,lebedev,0.9729785821780196,0.0
+kg6_komega_mylake,k-omega,mylake,0.8579143308612694,0.320887953042984
+kg6_kpp_winton,kpp,winton,1.1831113632808785,1.149057149887085
+kg6_kpp_lebedev,kpp,lebedev,0.9940201695771669,0.0
+kg6_kpp_mylake,kpp,mylake,1.025483576009569,0.17201830446720123
+kg6_noice_keps,k-eps,no_ice,0.982344759340585,0.0
+kg6_noice_komega,k-omega,no_ice,0.9729785821780196,0.0
+kg6_noice_kpp,kpp,no_ice,0.9940201695771669,0.0

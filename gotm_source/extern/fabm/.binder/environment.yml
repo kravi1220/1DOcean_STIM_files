@@ -1,0 +1,14 @@
+name: fabm
+channels:
+  - conda-forge
+dependencies:
+  - python
+  - pip
+  - gfortran
+  - cmake
+  - jupyterlab
+  - numpy
+  - matplotlib
+  - scipy
+  - ipympl
+  - pyyaml
