@@ -6,7 +6,7 @@ This repo is for the manuscript submitted to the
 This repo lets you **build GOTM+STIM, run every model configuration used
 in the paper, and regenerate every figure and table from that output**. It
 does **not** include the code that built the initial-condition, forcing, or
-GOTM-config files in the first place, nor any raw model outpu.
+GOTM-config files in the first place, nor any raw model output. 
 | Folder | Contents |
 |---|---|
 | `gotm_source/` | GOTM v6.0.0 source (+ STIM ice module, CVMix, gsw, flexout), with git history and build directories stripped. See `gotm_source/VERSION.txt` for exact component commits and the build configuration used. |
