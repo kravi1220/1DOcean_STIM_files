@@ -1,15 +1,13 @@
 #  "Beyond the No-Physics Control: A Verification Framework for 1D Ocean-Ice Modeling"
 
-Kumar Ravi Prakash. Reproduction package for a manuscript submitted to the
-*Journal of Advances in Modeling Earth Systems* (JAMES).
+Kumar Ravi Prakash. This repo is for the manuscript submitted to the
+*Journal of Advances in Modeling Earth Systems* (JAMES). 
 
-This package lets you **build GOTM+STIM, run every model configuration used
+This repo lets you **build GOTM+STIM, run every model configuration used
 in the paper, and regenerate every figure and table from that output**. It
 does **not** include the code that built the initial-condition, forcing, or
 GOTM-config files in the first place, nor any raw model output — see
 "What's deliberately not here" below.
-
-## What's in this package
 
 | Folder | Contents |
 |---|---|
@@ -147,26 +145,6 @@ left in for completeness of the working pipeline.
 | Table 7 | `T30_LB9_kg6_noice_comparison.csv` | `scoring/s28_LB9_kg6_analysis.py` |
 | Table A1 | (static — no script; the experiment design itself) | — |
 
-## Central finding this package reproduces
-
-At the surveyed LB9 position (66.14767N, 27.25850W), no combination of
-turbulence closure, ice-thermodynamic scheme, or bulk-flux formula tested
-reproduces the observed near-freezing event once every result is verified
-against three independent checks: the forcing position against a surveyed
-coordinate, engagement against an independent reinitialization, and every
-closure's own trajectory against a numerically converged time step. A
-forcing-sensitivity sweep quantifies the shortfall as several degrees,
-consistent with a missing lateral-heat-advection term. A structurally
-different, non-marginal site (KG6) confirms the diagnostic discriminates
-correctly: there, all three closures do reach the local freezing point,
-with a real, converged ~0.33 degC spread in how cold each gets.
-
-## Verification
-
-Every table in `tables_output/` and every figure in `figures_output/` in
-this package was regenerated from scratch using only the code and inputs
-included here, and every table matched the working pipeline's own output
-byte-for-byte.
 
 ## License
 
