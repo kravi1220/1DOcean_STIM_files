@@ -1,6 +1,6 @@
 #  "Beyond the No-Physics Control: A Verification Framework for 1D Ocean-Ice Modeling"
 
-Kumar Ravi Prakash. This repo is for the manuscript submitted to the
+This repo is for the manuscript submitted to the
 *Journal of Advances in Modeling Earth Systems* (JAMES). 
 
 This repo lets you **build GOTM+STIM, run every model configuration used
