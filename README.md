@@ -123,7 +123,7 @@ python figures/s24_LB9_event2_figure.py        # supplementary: second-event eng
 embedded in the current manuscript; they're harmless to regenerate and are
 left in for completeness of the working pipeline.
 
-## Figure/table cross-reference (current manuscript)
+## Figure/table 
 
 | Manuscript | File | Built by |
 |---|---|---|
