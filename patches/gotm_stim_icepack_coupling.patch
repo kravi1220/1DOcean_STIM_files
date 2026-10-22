@@ -1,0 +1,419 @@
+--- a/src/gotm/gotm.F90
++++ b/src/gotm/gotm.F90
+@@ -48,6 +48,13 @@
+ #ifdef _ICE_
+    use gotm_stim_driver, only: ice_model
+    use gotm_stim_driver, only: init_ice, post_init_ice, do_ice, clean_ice, ice_cover
++#ifdef STIM_ICEPACK
++   use gotm_stim_driver, only: ICE_MODEL_ICEPACK, snowfall_input
++   use stim_icepack, only: init_stim_icepack, do_stim_icepack, clean_stim_icepack
++   use stim_icepack, only: ip_aice, ip_fhocn, ip_fswthru, ip_fresh, ip_fsalt, ip_frazil_heat
++   use airsea_driver, only: airt_input, ql_input
++   use airsea_variables, only: rhoa
++#endif
+    use stim_variables, only: Hice, rho_ice
+    use stim_variables, only: Tice_surface,albedo_ice,transmissivity
+    use stim_variables, only: melt_rate,T_melt,S_melt
+@@ -188,6 +195,9 @@
+    logical          ::    config_only=.false.
+    integer          ::    n
+    integer          ::    configuration_version=_CFG_VERSION_
++#ifdef STIM_ICEPACK
++   integer          ::    ip_yy, ip_mm, ip_dd, ip_jd0
++#endif
+    integer          ::    cfg_version
+    type (type_header) :: yaml_header
+ !EOP
+@@ -649,6 +659,13 @@
+ #ifdef _ICE_
+    call post_init_ice(ta,S(nlev))
+ #endif
++#ifdef STIM_ICEPACK
++   if (ice_model == ICE_MODEL_ICEPACK) then
++      call calendar_date(julianday,ip_yy,ip_mm,ip_dd)
++      call julian_day(ip_yy,1,1,ip_jd0)
++      call init_stim_icepack(latitude,longitude,dt,(julianday-ip_jd0)*86400._rk+secondsofday)
++   end if
++#endif
+ 
+    ! Call stratification to make sure density has sensible value.
+    ! This is needed to ensure the initial density is saved correctly, and also for FABM.
+@@ -725,6 +742,9 @@
+    REALTYPE                  :: tRad(0:nlev),bRad(0:nlev)
+ 
+    REALTYPE                  :: Qsw, Qflux
++#ifdef STIM_ICEPACK
++   REALTYPE                  :: ip_lwd, ip_swd, ip_aow
++#endif
+    integer                   :: k
+    REALTYPE                  :: La, EFactor
+ !-----------------------------------------------------------------------
+@@ -765,6 +785,12 @@
+ #endif
+          end if
+       end if
++#ifdef STIM_ICEPACK
++      if (ice_model == ICE_MODEL_ICEPACK) then
++         ip_lwd = ql_input%value   ! downward LW from file, before airsea turns it into net LW
++         ip_swd = I_0%value        ! downward SW from file, before albedo
++      end if
++#endif
+       call do_airsea(julianday,secondsofday)
+ 
+ #ifdef _ICE_
+@@ -776,10 +802,31 @@
+ 
+ #ifdef _ICE_
+       Qsw = I_0%value
++#ifdef STIM_ICEPACK
++      if (ice_model /= ICE_MODEL_ICEPACK) &
++#endif
+       call do_ice(h(nlev),dt,u_taus,T(nlev),S(nlev),ta,precip_input%value,Qsw,surface_fluxes)
+ #endif
+ 
+ !     reset some quantities
++#ifdef STIM_ICEPACK
++      if (ice_model == ICE_MODEL_ICEPACK) then
++!        Icepack column over the ice fraction ip_aice; GOTM's own Kondo fluxes over
++!        the open-water fraction. Icepack fluxes are grid-box means, positive into the ocean.
++         call do_stim_icepack(dt, airt_input%value, qa, u10_input%value, v10_input%value, rhoa, &
++                              ip_lwd, ip_swd, precip_input%value, snowfall_input%value, &
++                              gsw_t_from_ct(S(nlev),T(nlev),_ZERO_), Sp(nlev), h(nlev), rho0, cp)
++         ip_aow = _ONE_ - ip_aice
++         I_0%value = ip_aow*I_0%value + ip_fswthru           ! shortwave into the water column
++         swf = ip_aow*(precip_input%value+evap) + ip_fresh/1000._rk   ! freshwater [m/s]
++         shf = -ip_aow*heat_input%value - ip_fhocn            ! upward surface heat flux [W/m2]
++         ssf = S(nlev)*swf - ip_fsalt*1000._rk/rho0           ! upward salt flux [g/kg m/s]
++         tx = ip_aow*tx/rho0                                  ! no ice motion: no stress under ice
++         ty = ip_aow*ty/rho0
++!        supercooled top layer: the ocean gives the frazil heat to Icepack and returns to Tf
++         T(nlev) = T(nlev) + ip_frazil_heat*dt/(rho0*cp*h(nlev))
++      else
++#endif
+       if(ice_cover .gt. 0) then
+          shf = _ZERO_
+          heat_input%value = _ZERO_
+@@ -798,6 +845,9 @@
+          tx = tx/rho0
+          ty = ty/rho0
+       end if
++#ifdef STIM_ICEPACK
++      end if
++#endif
+ 
+       call integrated_fluxes(dt)
+ 
+@@ -954,6 +1004,9 @@
+ 
+ #ifdef _ICE_
+    call clean_ice()
++#ifdef STIM_ICEPACK
++   if (ice_model == ICE_MODEL_ICEPACK) call clean_stim_icepack()
++#endif
+ #endif
+ 
+    call clean_meanflow()
+--- a/extern/stim/CMakeLists.txt
++++ b/extern/stim/CMakeLists.txt
+@@ -26,6 +26,7 @@
+ option(STIM_LEBEDEV "Lebedev ICE model" ON)
+ option(STIM_MYLAKE "MyLake ICE model" ON)
+ option(STIM_WINTON "Winton ICE model" ON)
++option(STIM_ICEPACK "Icepack column physics (CICE-Consortium) as STIM ice model" OFF)
+ # KBoption(STIM_OBSICE "Observed ICE model" ON)
+ 
+ include(src/CMakeLists.txt)
+--- a/extern/stim/src/drivers/gotm/gotm_stim.F90
++++ b/extern/stim/src/drivers/gotm/gotm_stim.F90
+@@ -7,6 +7,9 @@
+ 
+    use stim_variables, only: rk
+    use stim_models
++#ifdef STIM_ICEPACK
++   use input, only: type_scalar_input, register_input
++#endif
+    IMPLICIT NONE
+ 
+    private
+@@ -31,6 +34,10 @@
+    end interface
+ 
+    integer, public :: ice_model
++#ifdef STIM_ICEPACK
++   type (type_scalar_input), public, target :: snowfall_input
++     !! snowfall [m/s water equivalent], used by the Icepack model only
++#endif
+      !! select ice model to apply
+ 
+    ENUM, BIND(C)
+@@ -40,7 +47,9 @@
+       ENUMERATOR :: LEBEDEV=3
+       ENUMERATOR :: MYLAKE=4
+       ENUMERATOR :: WINTON=5
++      ENUMERATOR :: ICEPACK=6
+    END ENUM
++   integer, parameter, public :: ICE_MODEL_ICEPACK=6
+ 
+ !-----------------------------------------------------------------------
+ 
+@@ -76,10 +85,17 @@
+ #ifdef STIM_WINTON
+                      ,option(WINTON, 'Michael Winton (2000)', 'winton') &
+ #endif
++#ifdef STIM_ICEPACK
++                     ,option(ICEPACK, 'Icepack column physics (CICE-Consortium)', 'icepack') &
++#endif
+                      /))
+    call branch%get(Hice, 'H', 'initial ice thickness', 'm',default=0._rk)
+    call branch%get(ocean_ice_flux, 'ocean_ice_flux', &
+                    'ocean->ice heat flux','W/m^2',default=0._rk, display=display_hidden)
++#ifdef STIM_ICEPACK
++   call branch%get(snowfall_input, 'snowfall', 'snowfall (water equivalent), Icepack only', 'm/s', &
++                   default=0._rk)
++#endif
+    LEVEL2 'done.'
+ allocate(Tice(2))
+    END SUBROUTINE init_stim_yaml
+@@ -131,6 +147,11 @@
+          stop 'post_init_stim(): init_stim_winton()'
+ #endif
+ #endif
++#ifdef STIM_ICEPACK
++      case(ICEPACK)
++         LEVEL1 'Icepack: initialised from gotm.F90 (init_stim_icepack)'
++         call register_input(snowfall_input)
++#endif
+       case default
+          stop 'invalid ice model'
+    end select
+@@ -215,6 +236,10 @@
+             call do_stim_winton(ice_cover,dz,dt,Tw,S,Ta,precip,Qsw,Qfluxes)
+          end if
+ #endif
++#ifdef STIM_ICEPACK
++      case(ICEPACK)
++         stop 'do_stim(): Icepack is stepped by do_stim_icepack from gotm.F90'
++#endif
+       case default
+          stop 'invalid ice model'
+    end select
+--- a/extern/stim/src/models/CMakeLists.txt
++++ b/extern/stim/src/models/CMakeLists.txt
+@@ -11,6 +11,7 @@
+ include(${CMAKE_CURRENT_LIST_DIR}/lebedev/CMakeLists.txt)
+ include(${CMAKE_CURRENT_LIST_DIR}/mylake/CMakeLists.txt)
+ include(${CMAKE_CURRENT_LIST_DIR}/winton/CMakeLists.txt)
++include(${CMAKE_CURRENT_LIST_DIR}/icepack/CMakeLists.txt)
+ target_include_directories(stim PUBLIC
+         $<INSTALL_INTERFACE:include>
+         $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/modules>
+--- a/extern/stim/src/models/stim_models.F90
++++ b/extern/stim/src/models/stim_models.F90
+@@ -22,6 +22,9 @@
+ #ifdef STIM_WINTON
+    use stim_winton, only: init_stim_winton, do_stim_winton
+ #endif
++#ifdef STIM_ICEPACK
++   use stim_icepack, only: init_stim_icepack, do_stim_icepack
++#endif
+    IMPLICIT NONE
+ 
+ !-----------------------------------------------------------------------
+--- /dev/null
++++ b/extern/stim/src/models/icepack/CMakeLists.txt
+@@ -0,0 +1,24 @@
++if(STIM_ICEPACK)
++   # Icepack column physics + Icepack's own column driver (minus its main program),
++   # built as a separate library with Icepack's compile-time sizes, then linked into STIM.
++   # Sizes: one column, one thickness category (no ITD: no ridging/advection in 1D),
++   # 7 ice layers, 1 snow layer; tracer switches as in Icepack's smoke test.
++   file(GLOB ICEPACK_COLUMN ${CMAKE_CURRENT_LIST_DIR}/columnphysics/*.F90)
++   file(GLOB ICEPACK_DRIVER ${CMAKE_CURRENT_LIST_DIR}/driver/*.F90)
++   add_library(stim_icepack_lib STATIC ${ICEPACK_COLUMN} ${ICEPACK_DRIVER})
++   target_compile_definitions(stim_icepack_lib PRIVATE
++      FORTRANUNDERSCORE NO_SNICARHC
++      NXGLOB=1 NICELYR=7 NSNWLYR=1 NICECAT=1 NFSDCAT=1
++      TRAGE=1 TRFY=1 TRLVL=1 TRPND=1 TRSNOW=0 TRBRI=0 NTRISO=0 NTRAERO=1 NBGCLYR=1
++      TRALG=0 TRBGCZ=0 TRDOC=0 TRDIC=0 TRDON=0 TRFED=0 TRFEP=0 TRZAERO=0 TRBGCS=0)
++   target_compile_options(stim_icepack_lib PRIVATE -ffree-line-length-none)
++   set_property(TARGET stim_icepack_lib PROPERTY Fortran_MODULE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/icepack_modules)
++   target_include_directories(stim_icepack_lib PUBLIC $<BUILD_INTERFACE:${CMAKE_CURRENT_BINARY_DIR}/icepack_modules>)
++
++   install(TARGETS stim_icepack_lib EXPORT stimConfig
++           LIBRARY DESTINATION lib ARCHIVE DESTINATION lib)
++
++   target_sources(stim PRIVATE ${CMAKE_CURRENT_LIST_DIR}/stim_icepack.F90)
++   target_link_libraries(stim PUBLIC stim_icepack_lib)
++   target_compile_definitions(stim PUBLIC STIM_ICEPACK)
++endif(STIM_ICEPACK)
+--- /dev/null
++++ b/extern/stim/src/models/icepack/stim_icepack.F90
+@@ -0,0 +1,168 @@
++   MODULE stim_icepack
++     !! Icepack (CICE-Consortium) column physics as a STIM ice model for GOTM.
++     !!
++     !! One Icepack column is advanced with Icepack's own driver step (icedrv
++     !! ice_step: prep_radiation, step_therm1, step_therm2, update_state, step_snow,
++     !! step_radiation, coupling_prep) once per GOTM time step, exactly as Icepack's
++     !! standalone run loop does, except that the forcing arrays are filled from GOTM
++     !! instead of from Icepack's forcing files and Icepack's slab ocean is not used
++     !! (oceanmixed_ice must be .false.).
++     !!
++     !! Atmosphere -> ice part: ERA5 meteorology as used by GOTM (air T, dew-point
++     !!   humidity, 10 m wind, pressure via air density, downward SW and LW, rain and
++     !!   snow); Icepack computes its own fluxes over ice (icepack_atm_boundary).
++     !! Ocean -> ice: top-layer in-situ T and practical S, freezing/melting potential
++     !!   frzmlt = (Tf - sst) rho0 cp h_top / dt, limited to +-frzmlt_max (CICE
++     !!   convention); no ice motion, so ice-ocean stress = 0 (ustar = ustar_min).
++     !! Ice -> ocean (grid-box means, positive into the ocean): fhocn_ai, fswthru_ai,
++     !!   fresh_ai, fsalt_ai, plus the frazil heat the ocean gives up when frzmlt > 0.
++     !! The open-water fraction (1 - aice) is handled by GOTM itself (Kondo fluxes).
++     !!
++     !! Settings are read by Icepack from 'icepack_in' in the run directory.
++     !! Author: block C of the KG6 experiment design (2026-10-05), AI-assisted (Claude).
++
++   use stim_variables, only: rk, Hice
++   use icedrv_kinds, only: dbl_kind, int_kind
++   IMPLICIT NONE
++
++   private
++   public init_stim_icepack, do_stim_icepack, clean_stim_icepack
++
++   real(rk), public :: ip_aice=0._rk, ip_vice=0._rk, ip_vsno=0._rk, ip_Tsfc=0._rk, ip_Sice=0._rk
++   real(rk), public :: ip_fhocn=0._rk, ip_fswthru=0._rk, ip_fresh=0._rk, ip_fsalt=0._rk
++   real(rk), public :: ip_frazil_heat=0._rk, ip_frzmlt=0._rk, ip_Tf=0._rk
++
++   real(rk), parameter :: frzmlt_max = 1000._rk   ! W/m2, as CICE
++   integer :: diag_unit = -1
++   real(rk) :: acc(8) = 0._rk, acc_t = 0._rk
++   integer  :: nt_Tsfc, nt_sice, nilyr
++
++   contains
++
++!-----------------------------------------------------------------------
++
++   SUBROUTINE init_stim_icepack(lat_deg, lon_deg, dt_gotm, start_sec)
++     !! lat/lon of the column [deg], GOTM time step [s], GOTM start time in seconds
++     !! since 1 January of Icepack's year_init (used only to verify the calendar).
++   use icedrv_InitMod, only: icedrv_initialize
++   use icedrv_init, only: TLAT, TLON
++   use icedrv_calendar, only: dt, time
++   use icedrv_forcing, only: oceanmixed_ice
++   use icepack_intfc, only: icepack_query_tracer_indices, icepack_query_parameters, &
++                            icepack_query_tracer_sizes
++   use icedrv_domain_size, only: nilyr_d => nilyr
++   real(rk), intent(in) :: lat_deg, lon_deg, dt_gotm, start_sec
++   real(dbl_kind) :: pi
++!-----------------------------------------------------------------------
++   write(*,*) 'init_stim_icepack()'
++   call icedrv_initialize()
++   call icepack_query_parameters(pi_out=pi)
++   TLAT(:) = lat_deg*pi/180._dbl_kind
++   TLON(:) = lon_deg*pi/180._dbl_kind
++   if (abs(dt - dt_gotm) > 1.e-9_rk) then
++      write(*,*) 'icepack_in dt =', dt, ' differs from GOTM dt =', dt_gotm
++      stop 'init_stim_icepack(): dt mismatch'
++   end if
++   ! icedrv_initialize advances the clock by one step: during ice_step, time is the END
++   ! of the step being computed (Icepack's own convention), i.e. start + dt here
++   if (abs(time - dt - start_sec) > 0.5_rk) then
++      write(*,*) 'icepack_in start (istep0*dt) =', time-dt, ' differs from GOTM start =', start_sec
++      stop 'init_stim_icepack(): start time mismatch (set istep0 = start_sec/dt)'
++   end if
++   if (oceanmixed_ice) stop 'init_stim_icepack(): set oceanmixed_ice = .false. in icepack_in'
++   call icepack_query_tracer_indices(nt_Tsfc_out=nt_Tsfc, nt_sice_out=nt_sice)
++   nilyr = nilyr_d
++   open(newunit=diag_unit, file='icepack_column.dat', status='replace', action='write')
++   write(diag_unit,'(a)') '# hours_since_Jan1_year_init aice vice_m vsno_m hi_m Tsfc_C Sice_bulk_ppt' // &
++        ' fhocn_ai_Wm2 fswthru_ai_Wm2 fresh_ai_kgm2s fsalt_ai_kgm2s frazil_heat_Wm2 frzmlt_Wm2 Tf_C' // &
++        ' (fluxes: means over the preceding hour; state: instantaneous)'
++   write(*,*) 'Icepack column at lat,lon =', lat_deg, lon_deg, ' dt =', dt, ' start time =', time-dt
++   write(*,*) 'done.'
++   END SUBROUTINE init_stim_icepack
++
++!-----------------------------------------------------------------------
++
++   SUBROUTINE do_stim_icepack(dtg, Tair_C, Qa_in, u10, v10, rhoa_in, flwd, fswd, &
++                              prec_mps, snow_mps, sst_C, sss_psu, h_top, rho0, cp)
++     !! Advance Icepack by one GOTM step. Inputs: air T [C], specific humidity
++     !! [kg/kg], 10 m wind [m/s], air density [kg/m3], downward LW and SW [W/m2],
++     !! total precipitation and snowfall [m/s water], top-layer in-situ T [C] and
++     !! practical S [psu], top-layer thickness [m], rho0 [kg/m3], cp [J/kg/K].
++   use icedrv_flux, only: Tair, Qa, uatm, vatm, wind, potT, rhoa, zlvl, flw, &
++                          swvdr, swvdf, swidr, swidf, fsw, frain, fsnow, strax, stray, &
++                          sst, sss, Tf, frzmlt, uocn, vocn, qdp, hmix, &
++                          fhocn_ai, fswthru_ai, fresh_ai, fsalt_ai, init_flux_atm_ocn
++   use icedrv_state, only: aice, vice, vsno, trcr
++   use icedrv_RunMod, only: ice_step
++   use icedrv_calendar, only: istep, istep1, time, dt, calendar
++   use icepack_intfc, only: icepack_sea_freezing_temperature, icepack_query_parameters
++   real(rk), intent(in) :: dtg, Tair_C, Qa_in, u10, v10, rhoa_in, flwd, fswd
++   real(rk), intent(in) :: prec_mps, snow_mps, sst_C, sss_psu, h_top, rho0, cp
++   real(dbl_kind) :: Tffresh, rhofresh
++   real(rk) :: s, t_end
++   integer :: k
++!-----------------------------------------------------------------------
++   call icepack_query_parameters(Tffresh_out=Tffresh, rhofresh_out=rhofresh)
++
++   ! atmosphere, as icedrv prepare_forcing does it (frc* = Icepack band fractions)
++   Tair(:) = Tair_C + Tffresh
++   potT(:) = Tair(:)
++   Qa(:)   = max(Qa_in, 0._rk)
++   uatm(:) = u10;  vatm(:) = v10
++   wind(:) = sqrt(u10*u10 + v10*v10)
++   strax(:) = 0._rk;  stray(:) = 0._rk          ! calc_strair = .true.: Icepack computes stress
++   rhoa(:) = max(rhoa_in, 0._rk)
++   zlvl(:) = 10._rk
++   flw(:)  = flwd
++   fsw(:)  = max(fswd, 0._rk)
++   swvdr(:) = fsw(:)*0.28_rk; swvdf(:) = fsw(:)*0.24_rk
++   swidr(:) = fsw(:)*0.31_rk; swidf(:) = fsw(:)*0.17_rk
++   fsnow(:) = max(snow_mps, 0._rk)*rhofresh
++   frain(:) = max(prec_mps - snow_mps, 0._rk)*rhofresh
++
++   ! ocean
++   sss(:) = max(sss_psu, 0._rk)
++   sst(:) = sst_C
++   Tf(:)  = icepack_sea_freezing_temperature(sss(1))
++   frzmlt(:) = max(min((Tf(1) - sst_C)*rho0*cp*h_top/dtg, frzmlt_max), -frzmlt_max)
++   uocn(:) = 0._rk; vocn(:) = 0._rk; qdp(:) = 0._rk; hmix(:) = h_top
++
++   call init_flux_atm_ocn()
++   t_end = time                      ! end of the step being computed (Icepack convention)
++   call ice_step()
++   istep  = istep  + 1
++   istep1 = istep1 + 1
++   time   = time + dt
++   call calendar(time)
++
++   ip_aice = aice(1); ip_vice = vice(1); ip_vsno = vsno(1)
++   ip_Tsfc = trcr(1,nt_Tsfc)
++   s = 0._rk
++   do k = 1, nilyr
++      s = s + trcr(1,nt_sice+k-1)
++   end do
++   ip_Sice = s/nilyr
++   ip_fhocn = fhocn_ai(1); ip_fswthru = fswthru_ai(1)
++   ip_fresh = fresh_ai(1); ip_fsalt = fsalt_ai(1)
++   ip_frzmlt = frzmlt(1); ip_Tf = Tf(1)
++   ip_frazil_heat = max(frzmlt(1), 0._rk)   ! heat the ocean releases to reach Tf (W/m2)
++   Hice = ip_vice                            ! grid-box mean thickness, for GOTM output
++
++   acc = acc + dtg*(/ ip_fhocn, ip_fswthru, ip_fresh, ip_fsalt, ip_frazil_heat, ip_frzmlt, 0._rk, 0._rk /)
++   acc_t = acc_t + dtg
++   if (mod(t_end, 3600._rk) < 0.5_rk*dtg .or. 3600._rk - mod(t_end, 3600._rk) < 0.5_rk*dtg) then
++      write(diag_unit,'(f12.4,3es14.6,es14.6,2f10.4,6es14.6,f9.4)') t_end/3600._rk, ip_aice, ip_vice, ip_vsno, &
++           ip_vice/max(ip_aice,1.e-10_rk), ip_Tsfc, ip_Sice, acc(1:6)/acc_t, ip_Tf
++      acc = 0._rk; acc_t = 0._rk
++   end if
++   END SUBROUTINE do_stim_icepack
++
++!-----------------------------------------------------------------------
++
++   SUBROUTINE clean_stim_icepack()
++   if (diag_unit > 0) close(diag_unit)
++   END SUBROUTINE clean_stim_icepack
++
++!-----------------------------------------------------------------------
++
++   END MODULE stim_icepack

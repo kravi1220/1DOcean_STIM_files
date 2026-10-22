@@ -1,0 +1,11 @@
+[deps]
+CUDA = "052768ef-5323-5732-b1bb-66c8b64840ba"
+GibbsSeaWater = "9a22fb26-0b63-4589-b28e-8f9d0b5c3d05"
+JLD2 = "033835bb-8acc-5ee8-8aae-3f567f8a3819"
+NCDatasets = "85f8d34a-cbdd-5861-8df4-14fed0d494ab"
+Oceananigans = "9e8cae18-63c1-5223-a75c-80ca9d6e9a09"
+SeawaterPolynomials = "d496a93d-167e-4197-9f49-d3af4ff8fe40"
+
+[extras]
+CUDA_Compiler_jll = "d1e2174e-dfdc-576e-b43e-73b79eb1aca8"
+CUDA_Runtime_jll = "76a88914-d11a-5bdc-97e0-2f5a05c973a2"

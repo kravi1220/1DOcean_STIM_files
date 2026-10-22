@@ -1,0 +1,77 @@
+<streams>
+
+<immutable_stream name="mesh" type="input" io_type="netcdf"
+                  filename_template="init.nc" input_interval="initial_only" />
+
+<immutable_stream name="input" type="input" io_type="netcdf"
+                  filename_template="init.nc" input_interval="initial_only" />
+
+<immutable_stream name="restart" type="input;output" io_type="netcdf"
+                  filename_template="restarts/restart.$Y-$M-$D_$h.$m.$s.nc"
+                  filename_interval="output_interval"
+                  reference_time="2018-11-28_00:00:00"
+                  clobber_mode="truncate"
+                  input_interval="initial_only"
+                  output_interval="0000_01:00:00" />
+
+<stream name="forcing_data" type="input" io_type="netcdf"
+        filename_template="forcing_segment.nc" input_interval="initial_only" >
+	<var name="windStressZonal"/>
+	<var name="windStressMeridional"/>
+	<var name="latentHeatFlux"/>
+	<var name="sensibleHeatFlux"/>
+	<var name="longWaveHeatFluxUp"/>
+	<var name="longWaveHeatFluxDown"/>
+	<var name="shortWaveHeatFlux"/>
+	<var name="evaporationFlux"/>
+	<var name="rainFlux"/>
+	<var name="seaIceHeatFlux"/>
+	<var name="seaIceFreshWaterFlux"/>
+	<var name="seaIceSalinityFlux"/>
+</stream>
+
+<stream name="output" type="output" io_type="netcdf"
+        filename_template="output/segment.nc"
+        filename_interval="none"
+        output_interval="0000_01:00:00"
+        reference_time="2018-11-28_00:00:00"
+        clobber_mode="truncate" >
+	<var_array name="activeTracers"/>
+	<var name="xtime"/>
+	<var name="normalVelocity"/>
+	<var name="layerThickness"/>
+	<var name="boundaryLayerDepth"/>
+	<var name="w2"/>
+	<var name="u2"/>
+	<var name="v2"/>
+	<var name="wt"/>
+	<var name="ws"/>
+	<var name="w3"/>
+	<var name="uw"/>
+	<var name="vw"/>
+	<var name="areaFraction"/>
+	<var name="Mc"/>
+	<var name="eps"/>
+	<var name="length"/>
+	<var name="KspsU"/>
+	<var name="KspsD"/>
+</stream>
+
+<stream name="mixedLayerDepthsOutput" type="output" io_type="netcdf"
+        filename_template="analysis_members/mixedLayerDepths.nc"
+        filename_interval="none" output_interval="none" clobber_mode="truncate"
+        packages="mixedLayerDepthsAMPKG" >
+	<var name="xtime"/>
+</stream>
+
+<!-- Never written; its alarm triggers ocn_turbulenceUpdateFields, which copies
+     the ADC prognostic fields into the arrays written by "output" (see
+     mode_forward/mpas_ocn_forward_mode.F:639). Without it ADC fields read 0. -->
+<stream name="adcTurbulenceOutput" type="output" io_type="netcdf"
+        filename_template="output/adc_unused.nc" filename_interval="none"
+        output_interval="0000_01:00:00" reference_time="2018-11-28_00:00:00"
+        clobber_mode="truncate" packages="mixedLayerDepthsAMPKG" >
+	<var name="xtime"/>
+</stream>
+
+</streams>

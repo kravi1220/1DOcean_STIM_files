@@ -1,0 +1,31 @@
+# CTD observations are not distributed (README)
+data/ctd_profiles_*.nc
+# builds
+build/
+models/mpas_adc/ocean_model
+models/mpas_adc/**/*.o
+models/mpas_adc/**/*.mod
+models/mpas_adc/**/*.a
+models/icepack_pipe/icepack_pipe
+# model output written by the run scripts (not part of the package)
+experiments/gotm/**/all.nc
+experiments/gotm/**/restart.nc
+experiments/gotm/**/gotm.log
+experiments/**/restart/
+experiments/**/icepack_column.dat
+experiments/**/ice_diag*
+experiments/mpas_adc/**/hourly/
+experiments/mpas_adc/**/output/
+experiments/mpas_adc/**/restarts/
+experiments/mpas_adc/**/analysis_members/
+experiments/mpas_adc/**/forcing_segment.nc
+experiments/mpas_adc/**/Restart_timestamp
+experiments/mpas_adc/**/log*.out
+experiments/mpas_adc/**/log*.err
+experiments/les/*_profiles.nc
+experiments/les/*_xz.nc
+experiments/les/*_chk_iteration*.jld2
+experiments/les/*_fluxes.csv
+experiments/les/*_ice.csv
+results/
+__pycache__/

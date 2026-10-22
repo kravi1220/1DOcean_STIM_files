@@ -1,0 +1,29 @@
+--- a/extern/stim/src/models/lebedev/stim_lebedev.F90
++++ b/extern/stim/src/models/lebedev/stim_lebedev.F90
+@@ -61,9 +61,14 @@
+       ! calculate the cumulative freezing days
+       fdd = fdd+(Tf-Ta)*dt/86400._rk
+    else ! ice_hi was 0._rk
+-      if (Ta .lt. Tf .and. Tw .lt. Tf) then
+-         fdd = fdd+(Tf-Ta)*dt/86400._rk
+-      end if 
++      ! KRP lebfix: accumulate freezing degree-days over successive steps while the surface
++      ! water is at/below freezing (the original reset fdd every step while fdd <= 1, so ice
++      ! could only start if one step supplied > 1 degree-day, i.e. never for dt < ~1 h)
++      if (Tw .lt. Tf) then
++         fdd = max(0._rk, fdd+(Tf-Ta)*dt/86400._rk)
++      else
++         fdd = 0._rk
++      end if
+    end if
+ 
+    ! have at least 1 cm of ice,.. - the melting is not done correct - KB
+@@ -90,7 +95,7 @@
+          ice_cover = 0
+       end if
+    else
+-      fdd = 0._rk
++      if (ice_cover .eq. 2) fdd = 0._rk   ! KRP lebfix: reset only when existing ice has melted
+       Hice = 0._rk
+       dHis = 0._rk
+       ice_cover = 0

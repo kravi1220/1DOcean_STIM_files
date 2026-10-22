@@ -1,0 +1,1 @@
+Icepack sources copied unmodified from CICE-Consortium/Icepack commit a348e4c1e189a48c2d1501875e062da4b532e066 (columnphysics/ and configuration/driver/, without icedrv_MAIN.F90 and columnphysics/version.txt). The coupling to GOTM is stim_icepack.F90 in this folder (see patches/README.md).

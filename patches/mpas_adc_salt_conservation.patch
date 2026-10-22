@@ -1,0 +1,33 @@
+diff --git a/src/core_ocean/shared/mpas_ocn_adcReconstruct.F b/src/core_ocean/shared/mpas_ocn_adcReconstruct.F
+index 30d43f88..557553ac 100644
+--- a/src/core_ocean/shared/mpas_ocn_adcReconstruct.F
++++ b/src/core_ocean/shared/mpas_ocn_adcReconstruct.F
+@@ -1244,8 +1244,10 @@ module ocn_adc_mixing_fused
+                    (1.0_RKIND - areaFraction(k+1,iCell))*wt_spsU(k+1,iCell)
+                  wsSumUp = ws(i1,k,iCell) + areaFraction(k,iCell)*ws_spsD(k,iCell) + &
+                    (1.0_RKIND - areaFraction(k,iCell))*ws_spsU(k,iCell)
+-                 wsSumDn = ws(i1,k+1,iCell) + areaFraction(k+1,iCell)*ws_spsU(k+1,iCell) + &
+-                   (1.0_RKIND - areaFraction(k+1,iCell))*ws_spsD(k+1,iCell)
++                 ! saltfix: spsD/spsU were swapped here (not as in wsSumUp/wtSumDn), so the
++                 ! interface salt flux did not telescope; same fix as later upstream (MPAS-Model a0d295fb)
++                 wsSumDn = ws(i1,k+1,iCell) + areaFraction(k+1,iCell)*ws_spsD(k+1,iCell) + &
++                   (1.0_RKIND - areaFraction(k+1,iCell))*ws_spsU(k+1,iCell)
+                  
+                  activeTracers(1,k,iCell) = activeTracers(1,k,iCell) - dt_small*(wtSumUp - &
+                    wtSumDn) / (ze(k,iCell) - ze(k+1,iCell))
+diff --git a/src/core_ocean/shared/mpas_ocn_vmix_adc.F b/src/core_ocean/shared/mpas_ocn_vmix_adc.F
+index 8df9c92f..7359772e 100644
+--- a/src/core_ocean/shared/mpas_ocn_vmix_adc.F
++++ b/src/core_ocean/shared/mpas_ocn_vmix_adc.F
+@@ -291,7 +291,10 @@ contains
+                         activeTracers(indexTemperature,1,iCell) + tracerGroupSurfaceFluxRunoff(indexTemperature,iCell) * &
+                         fracAbsorbedRunoff)
+ 
+-         ws_sfc(iCell) = -(tracerGroupSurfaceFlux(indexSalinity, iCell) - fracAbsorbed * surfaceThicknessFlux(iCell) *  &
++         ! saltfix: compute_ADC_tends takes wssfc positive DOWNWARD (ws(:,1) = -wssfc, buoyancy
++         ! alpha*wt + beta*wssfc), unlike wtsfc (upward); the original passed the upward flux, so
++         ! rain (and any surface salt flux) acted with the wrong sign
++         ws_sfc(iCell) = (tracerGroupSurfaceFlux(indexSalinity, iCell) - fracAbsorbed * surfaceThicknessFlux(iCell) *  &
+                         activeTracers(indexSalinity,1,iCell))
+ 
+          uw_sfc(iCell) = stressZonal(iCell) / rho_sw

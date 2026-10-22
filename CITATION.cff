@@ -1,0 +1,13 @@
+cff-version: 1.2.0
+message: "If you use this package, please cite it and the accompanying paper."
+title: "Reproduction package: GOTM with sea-ice thermodynamics at station KG6 (GOTM, MPAS-ADC, Oceananigans LES, Icepack)"
+authors:
+  - family-names: Prakash
+    given-names: Kumar Ravi
+    affiliation: "Marine and Freshwater Research Institute (MFRI), Iceland"
+  - family-names: Shukla
+    given-names: Rohit
+    affiliation: "Virginia Tech, Blacksburg, VA, USA"
+license: MIT
+repository-code: "https://github.com/kravi1220/1DOcean_STIM_files"
+keywords: [GOTM, STIM, Icepack, MPAS-Ocean, ADC, Oceananigans, large-eddy simulation, sea ice, Iceland]

@@ -1,0 +1,46 @@
+--- a/Makefile
++++ b/Makefile
+@@ -510,7 +510,7 @@
+ # Depending on PIO version, libraries may be libpio.a, or libpiof.a and libpioc.a
+ # Keep open the possibility of shared libraries in future with, e.g., .so suffix
+ #
+-ifneq ($(wildcard $(PIO_LIB)/libpio\.*), )
++ifneq ($(wildcard $(PIO_LIB)/libpio.a $(PIO_LIB)/libpio.so), )
+ 	LIBS += -lpio
+ endif
+ ifneq ($(wildcard $(PIO_LIB)/libpiof\.*), )
+--- a/src/core_ocean/Makefile
++++ b/src/core_ocean/Makefile
+@@ -46,14 +46,14 @@
+ 	( cp $(ROOT_DIR)/default_inputs/streams.ocean.init $(ROOT_DIR)/streams.ocean.init )
+ 
+ libcvmix:
+-	if [ -e cvmix/.git ]; then \
++	if [ -e cvmix/src/shared ]; then \
+ 		(cd cvmix/src/shared; make all FC="$(FC)" FCFLAGS="$(FFLAGS)" FINCLUDES="$(FINCLUDES)") \
+ 	else \
+ 		(pwd ; echo "Missing core_ocean/cvmix/.git, did you forget to 'git submodule update --init --recursive' ?"; exit 1) \
+ 	fi
+ 
+ libBGC:
+-	if [ -e BGC/.git ]; then \
++	if [ -e BGC/Makefile ]; then \
+ 		(cd BGC; make all FC="$(FC)" FCFLAGS="$(FFLAGS)" FINCLUDES="$(FINCLUDES)") \
+ 	else \
+ 		(echo "Missing core_ocean/BGC/.git, did you forget to 'git submodule update --init --recursive' ?"; exit 1) \
+@@ -66,13 +66,13 @@
+ 	( cd analysis_members; $(MAKE) FCINCLUDES="$(FCINCLUDES) $(OCEAN_SHARED_INCLUDES)" CPPFLAGS="$(CPPFLAGS)" CPPINCLUDES="$(CPPINCLUDES)" all ) 
+ 
+ clean:
+-	if [ -e cvmix/.git ]; then \
++	if [ -e cvmix/src/shared ]; then \
+ 		(cd cvmix/src/shared; make clean) \
+ 	fi
+ 	if [ -d inc ]; then \
+ 		($(RM) -r inc) \
+ 	fi
+-	if [ -e BGC/.git ]; then \
++	if [ -e BGC/Makefile ]; then \
+ 		(cd BGC; make clean) \
+ 	fi
+ 	(cd mode_forward; $(MAKE) clean)
