@@ -14,7 +14,6 @@
 # Usage: julia --project=. les_kg6_era5_icepack.jl <input.nc> <stop_hours> <dx> <tag> <checkpoint.jld2|none> <ice_dir>
 #   ice_dir: Icepack run folder whose icepack_in start (year_init, istep0) equals the model start time
 #   stop_hours: model time since the input 'start' at which to stop
-# AI use: written with Claude (Anthropic); the author must check it.
 
 using Oceananigans
 using Oceananigans.Units

@@ -2,8 +2,7 @@
  (A) ocean only:   Oceananigans LES alone  vs  GOTM k-eps 2 m, GOTM KPP 2 m, MPAS-ADC 2 m (to 23 Jun) / 5 m
  (B) with Icepack: Oceananigans LES x Icepack  vs  GOTM k-eps 2 m x Icepack, MPAS-ADC 5 m x Icepack
 All Icepack runs use the same mushy-layer configuration (Sections 4.3.3, 4.6; also imported by the figure scripts).
-Usage: python3 compare_fullyear.py > ../results/tables/compare_fullyear.txt
-AI use: written with Claude (Anthropic); the author must check it."""
+Usage: python3 compare_fullyear.py > ../results/tables/compare_fullyear.txt"""
 import os, sys, glob, datetime as dt, numpy as np, netCDF4 as nc, gsw
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import kg6_common as A, paths as P

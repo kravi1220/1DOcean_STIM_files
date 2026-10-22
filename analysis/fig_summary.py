@@ -6,7 +6,6 @@
   K11_KG6_skill.png          target diagrams of all runs against the CTD casts (T and S, 2-150 m)
 Needs results/tables/blockW_compare.txt and blockD_table.txt; numbers are written to results/tables/K_summary_numbers.txt.
 Usage: python3 fig_summary.py
-AI use: written with Claude (Anthropic); the author must check it.
 """
 import os, re, sys, datetime as dt, numpy as np, netCDF4 as nc
 import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt, matplotlib.dates as mdates

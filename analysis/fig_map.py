@@ -3,7 +3,6 @@
  (b) ice occurrence: % of days with concentration >= 15 %, 1 Dec 2018 - 31 May 2019
 Input: data/osisaf_region_20181201_20190531.npz (OSI-450-a daily fields, 1 Dec 2018 - 31 May 2019)
 Output: results/figures/K0_KG6_osisaf_map.png (paper Figure 1). Needs cartopy.
-AI use: written with Claude (Anthropic); the author must check it.
 """
 import os, sys, datetime as dt, numpy as np, matplotlib
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

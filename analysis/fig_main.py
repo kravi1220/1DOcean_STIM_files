@@ -2,7 +2,6 @@
 Conventions of kg6_common.py (Conservative Temperature and practical salinity everywhere); salt-fixed ADC.
 Needs results/tables/blockA_score.txt (blockA_score.py). Writes results/figures/K1-K5*.png and
 results/tables/K_numbers.json.
-AI use: written and run with Claude (Anthropic); the author must check figures and numbers.
 Usage: python3 fig_main.py"""
 import os, sys, json, datetime as dt
 import numpy as np, netCDF4 as nc, gsw

@@ -10,7 +10,6 @@ Usage (started by les_kg6_era5_icepack.jl):  python3 ice_server.py <run_dir> <st
           "aice vice vsno Tsfc Sice fhocn fswthru fresh fsalt frazil_heat aice_mean"
           (fluxes: hour means, grid-box means, positive into the ocean; MPAS-driver convention)
   "END" closes Icepack.
-AI use: written with Claude (Anthropic); the author must check it.
 """
 import os, sys, datetime as dt
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))

@@ -19,7 +19,7 @@
      !! The open-water fraction (1 - aice) is handled by GOTM itself (Kondo fluxes).
      !!
      !! Settings are read by Icepack from 'icepack_in' in the run directory.
-     !! Author: block C of the KG6 experiment design (2026-10-05), AI-assisted (Claude).
+     !! Author: K. R. Prakash (MFRI), 2026.
 
    use stim_variables, only: rk, Hice
    use icedrv_kinds, only: dbl_kind, int_kind
