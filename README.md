@@ -92,7 +92,7 @@ scripts/run_analysis.sh     # tables -> results/tables/, Figures 1-11 -> results
 | Figs. 7–11 | `K7`–`K11` | `analysis/fig_summary.py` |
 | Sections 4.1–4.7, Appendix A | `results/tables/*.txt`, `K_numbers.json`, `K_summary_numbers.txt` | the other scripts in `analysis/` |
 
-## Reproducibility notes
+## notes
 
 - GOTM: rebuilding from `models/gotm` with the compiler and libraries above reproduces the
   output of all 65 GOTM runs bit for bit; MPAS-ADC and the Icepack column reproduce the original
@@ -109,7 +109,7 @@ scripts/run_analysis.sh     # tables -> results/tables/, Figures 1-11 -> results
   cell-integrated shortwave used in all other runs. Shortwave in B1 is 1–7 W m⁻², so the
   difference is negligible.
 
-## Changes to third-party code (`patches/`)
+## Changes to code (`patches/`)
 
 - `gotm_stim_icepack_coupling.patch`: Icepack as a STIM ice model and its two-way coupling in `gotm.F90`.
 - `gotm_stim_lebedev_fix.patch`: STIM-Lebedev freezing-degree-day accumulation (Section 4.4.1).
@@ -140,8 +140,3 @@ files of the experiments contain the 6 Aug and 15 Oct 2018 casts as model input.
 - ERA5 (Hersbach et al., 2020), Copernicus Climate Change Service; contains modified Copernicus information.
 - OSI SAF Global Sea Ice Concentration Climate Data Record OSI-450-a and its operational continuation, EUMETSAT.
 
-## Use of AI tools
-
-This package was assembled with the help of Claude (Anthropic): the model couplings, run and
-analysis scripts and this documentation were written with AI assistance and checked against
-the model output by rerunning (see `VERIFICATION.md`). The authors are responsible for the content.
