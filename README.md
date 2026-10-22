@@ -2,8 +2,7 @@
 
 Kumar Ravi Prakash and Rohit Shukla. Code, model set-up and inputs for the manuscript
 *"GOTM with Sea-Ice Thermodynamics as a Foundation for Ocean–Ice Process Studies: Testing a
-Nonlocal Mass-Flux Closure, Large-Eddy Simulation and Mushy-Layer Sea Ice at a Subpolar Station"*
-(submitted to the *Journal of Advances in Modeling Earth Systems*).
+Nonlocal Mass-Flux Closure, Large-Eddy Simulation and Mushy-Layer Sea Ice at a Subpolar Station"*.
 
 With this package you can build the four models, rerun every experiment in the paper and
 regenerate every figure and the numbers quoted in the text. It contains **no model output**:
