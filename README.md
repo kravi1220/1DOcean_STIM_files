@@ -1,4 +1,4 @@
-# Reproduction package: GOTM with sea-ice thermodynamics at station KG6
+#  GOTM with sea-ice thermodynamics at station KG6
 
 Kumar Ravi Prakash and Rohit Shukla. Code, model set-up and inputs for the manuscript
 *"GOTM with Sea-Ice Thermodynamics as a Foundation for Ocean–Ice Process Studies: Testing a
